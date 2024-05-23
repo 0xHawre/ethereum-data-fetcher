@@ -22,11 +22,11 @@ pip3 install requests
 ```bash
 git clone https://github.com/Hafxhak/ethereum-data-fetcher
 cd ethereum-data-fetcher
-&& cd ETH
 ```
 2.Edit the Script:
 Open the script in a text editor:
 ```bash
+cd ETH
 nano ETH.py
 ```
 Replace the placeholder URL in the RPC_URLS list with your own Ethereum RPC endpoint URLs. Example:
