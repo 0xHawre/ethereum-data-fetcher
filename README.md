@@ -21,7 +21,8 @@ pip3 install requests
 1.Clone the Repository:
 ```bash
 git clone https://github.com/Hafxhak/ethereum-data-fetcher
-cd ETH
+cd ethereum-data-fetcher
+&& cd ETH
 ```
 2.Edit the Script:
 Open the script in a text editor:
