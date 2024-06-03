@@ -1,12 +1,12 @@
 import requests
 import json
-import time
+import logging
 from datetime import datetime
-import random
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 RPC_URLS = [
+    "https://eth1.lava.build/lava-referer-b3ebd262-006d-4555-8273-6d1508c4e92d/",
     "https://eth1.lava.build/lava-referer-fbd614bb-40a2-46c0-9f86-675e78683794/",
-
 ]
 
 ETH_METHOD = {
@@ -21,25 +21,30 @@ def fetch_ethereum_data(url):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
-        print(f"Failed to fetch Ethereum data from {url}: {e}")
+        logging.error(f"Failed to fetch Ethereum data from {url}: {e}")
         return None
 
 def main():
     usage_count = 0
-    while True:
-        for url in RPC_URLS:
-            eth_data = fetch_ethereum_data(url)
-            if eth_data:
-                usage_count += 1
-                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                print(f"[{timestamp}] RPC Call Count: {usage_count}")
-                print(f"Ethereum Data from {url}: {json.dumps(eth_data, indent=4)}")
-            else:
-                print(f"Failed to fetch Ethereum data from {url}.")
 
-            # Sleep for a random interval between 10 to 25 seconds
-            sleep_interval = random.uniform(10, 25)
-            time.sleep(sleep_interval)
+    def task(url):
+        nonlocal usage_count
+        eth_data = fetch_ethereum_data(url)
+        if eth_data:
+            usage_count += 1
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            log_message = f"[{timestamp}] RPC Call Count: {usage_count}\nEthereum Data from {url}: {json.dumps(eth_data, indent=4)}"
+            logging.info(log_message)
+        else:
+            logging.error(f"Failed to fetch Ethereum data from {url}.")
+
+    with ThreadPoolExecutor(max_workers=len(RPC_URLS)) as executor:
+        while True:
+            futures = [executor.submit(task, url) for url in RPC_URLS]
+            for future in as_completed(futures):
+                pass  # Ensures that all tasks are completed before continuing
 
 if __name__ == "__main__":
+    # Set up logging
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s:%(message)s')
     main()
